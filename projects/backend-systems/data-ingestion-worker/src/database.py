@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 
 DB_USER = os.getenv("POSTGRES_USER")
