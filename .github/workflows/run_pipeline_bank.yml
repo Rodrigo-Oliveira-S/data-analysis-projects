@@ -28,10 +28,10 @@ jobs:
 
     steps:
     - name: Baixar o código do repositório
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Preparar o Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
@@ -46,7 +46,7 @@ jobs:
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_PORT: ${{ secrets.DB_PORT }}
       run: |
-        cd projects/data-analysis/bank-customer-churn-analysis/python
+        cd data-analysis/bank-customer-churn-analysis/python
         python -c "
         import pandas as pd
         from database import get_engine
@@ -64,5 +64,5 @@ jobs:
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_PORT: ${{ secrets.DB_PORT }}
       run: |
-        cd projects/data-analysis/bank-customer-churn-analysis/python
+        cd data-analysis/bank-customer-churn-analysis/python
         python pipeline.py
