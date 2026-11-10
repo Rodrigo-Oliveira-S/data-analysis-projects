@@ -30,10 +30,12 @@ jobs:
 
     steps:                   
       - name: Baixar o código do repositório
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Preparar o Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -48,7 +50,7 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
-          cd projects/data-analysis/marketing-campaign-analysis/python
+          cd data-analysis/marketing-campaign-analysis/python
           python -c "
           import pandas as pd
           from database import get_engine
@@ -66,13 +68,20 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
-          cd projects/data-analysis/marketing-campaign-analysis/python
+          cd data-analysis/marketing-campaign-analysis/python
           python pipeline.py
 
       - name: Publicar os CSVs no repositório
         run: |
           git config --global user.name "Rodrigo Oliveira Silva"
           git config --global user.email "rodrigooliveirasilva91.2@outlook.com"
-          git add projects/data-analysis/marketing-campaign-analysis/data/*.csv
-          git commit -m "Atualiza CSVs automaticamente [skip ci]" || echo "Nada para commitar"
-          git push
+          git add data-analysis/marketing-campaign-analysis/data/*.csv
+          
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração nos CSVs. Nada para commitar."
+            exit 0
+          fi
+          
+          git commit -m "Atualiza CSVs automaticamente [skip ci]"
+          
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
