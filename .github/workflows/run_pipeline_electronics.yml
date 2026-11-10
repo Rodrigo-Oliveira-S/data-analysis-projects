@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Baixar o código do repositório
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Preparar o Python
         uses: actions/setup-python@v6
@@ -48,7 +50,7 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
-          cd projects/data-analysis/global-electronics-retailer-analysis/python
+          cd data-analysis/global-electronics-retailer-analysis/python
           python data_import.py
 
       - name: Executar o Pipeline de dados
@@ -58,13 +60,20 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
-          cd projects/data-analysis/global-electronics-retailer-analysis/python
+          cd data-analysis/global-electronics-retailer-analysis/python
           python pipeline.py
 
       - name: Publicar os CSVs no repositório
         run: |
           git config --global user.name "Rodrigo Oliveira Silva"
           git config --global user.email "rodrigooliveirasilva91.2@outlook.com"
-          git add projects/data-analysis/global-electronics-retailer-analysis/data/*.csv
-          git commit -m "Atualiza CSVs automaticamente [skip ci]" || echo "Nada para commitar"
-          git push
+          git add data-analysis/global-electronics-retailer-analysis/data/*.csv
+          
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração nos CSVs. Nada para commitar."
+            exit 0
+          fi
+          
+          git commit -m "Atualiza CSVs automaticamente [skip ci]"
+          
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
